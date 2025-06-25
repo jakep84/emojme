@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "emojMe - Emoji Picker",
+  "description": "Scroll and click emojis to copy!",
+  "version": "1.0",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icons/icon128.png"
+  },
+  "permissions": ["clipboardWrite"]
+}
