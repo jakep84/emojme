@@ -2,7 +2,7 @@
 
 **emojMe** is a lightweight Chrome extension that gives you instant access to thousands of emojis. Just click, copy, and paste – no fluff, no fuss.
 
-![screenshot](./screenshots/emojme-preview-large.png)
+![screenshot](./screenshots/emojMe-prevew-updated.png)
 
 ---
 
