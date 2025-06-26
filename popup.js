@@ -7,7 +7,8 @@ const batchSize = 200;
 let currentIndex = 0;
 let currentEmojiList = [...emojiList];
 
-// Utility: copy emoji and show tooltip
+let previewBox = null;
+
 function copyEmoji(emoji, tile) {
   navigator.clipboard.writeText(emoji).then(() => {
     tile.style.backgroundColor = "#c6f6d5";
@@ -40,20 +41,64 @@ function copyEmoji(emoji, tile) {
   });
 }
 
-// Render next batch of emojis
+// Show large emoji preview
+function showPreview(emoji, label, x, y) {
+  if (previewBox) previewBox.remove();
+
+  previewBox = document.createElement("div");
+  previewBox.className = "emoji-preview";
+  previewBox.innerHTML = `
+    <div class="emoji-large">${emoji}</div>
+    <div class="emoji-label">${label}</div>
+  `;
+  previewBox.style.left = `${x + 15}px`;
+  previewBox.style.top = `${y + 15}px`;
+  document.body.appendChild(previewBox);
+}
+
+// Remove preview
+function hidePreview() {
+  if (previewBox) {
+    previewBox.remove();
+    previewBox = null;
+  }
+}
+
+// Render a batch of emoji tiles
 function renderBatch() {
   const slice = currentEmojiList.slice(currentIndex, currentIndex + batchSize);
-  slice.forEach(({ emoji }) => {
+
+  slice.forEach(({ emoji, keywords }) => {
     const tile = document.createElement("div");
     tile.className = "emoji-tile";
     tile.innerHTML = emoji;
+
+    const tooltipText =
+      Array.isArray(keywords) && keywords.length > 0 ? keywords[0] : "";
+
+    tile.title = ""; // Disable native tooltip
+
     tile.onclick = () => copyEmoji(emoji, tile);
+
+    tile.addEventListener("mouseenter", (e) => {
+      const rect = e.target.getBoundingClientRect();
+      showPreview(
+        emoji,
+        tooltipText,
+        rect.left + window.scrollX,
+        rect.top + window.scrollY
+      );
+    });
+
+    tile.addEventListener("mouseleave", hidePreview);
+
     container.appendChild(tile);
   });
+
   currentIndex += batchSize;
 }
 
-// Reset and render new emoji list
+// Reset and render a new list of emojis
 function resetAndRender(list) {
   container.innerHTML = "";
   currentIndex = 0;
@@ -61,18 +106,20 @@ function resetAndRender(list) {
   renderBatch();
 }
 
-// Handle scroll to load more
+// Infinite scroll
 container.addEventListener("scroll", () => {
   const nearBottom =
     container.scrollTop + container.clientHeight >= container.scrollHeight - 20;
+
   if (nearBottom && currentIndex < currentEmojiList.length) {
     renderBatch();
   }
 });
 
-// Handle input search
+// Search filtering
 searchInput.addEventListener("input", () => {
   const query = searchInput.value.trim().toLowerCase();
+
   if (!query) {
     resetAndRender([...emojiList]);
   } else {
@@ -87,5 +134,5 @@ searchInput.addEventListener("input", () => {
   }
 });
 
-// Initial render
+// Initial load
 resetAndRender([...emojiList]);
